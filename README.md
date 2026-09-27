@@ -43,6 +43,8 @@ Accuracy alone makes the model look worthless: it ties the baseline exactly. AUC
 
 Dropping the not-yet-observable companies (the naive approach) gives a 3-year survival estimate of **34.8%**. Fitting a Kaplan-Meier estimator on the full panel (which correctly treats "not yet observed" as censored rather than excluded) gives **29.8%**, a **5.0 point** downward correction. The naive approach was systematically optimistic.
 
+![Kaplan-Meier survival curve](figures/kaplan_meier_curve.png)
+
 ## Is the bias itself stable over time? (cohort check)
 
 To check whether pooling all cohorts into one Kaplan-Meier curve is even valid, 1-year refiling hazard was compared across three first-filing cohorts:
@@ -54,6 +56,8 @@ To check whether pooling all cohorts into one Kaplan-Meier curve is even valid, 
 | 2021–2023 | 14.0% |
 
 The decline is real and monotonic; early-stage follow-on financing has gotten structurally less frequent over the period, not just noisier. Any model (naive or corrected) trained on pooled data is implicitly averaging over cohorts that don't behave the same way, which is a second, separate bias from the censoring one above.
+
+![Cohort hazard comparison](figures/cohort_hazard_comparison.png)
 
 ## Structure
 
