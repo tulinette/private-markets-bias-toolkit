@@ -89,11 +89,15 @@ def compare_cohorts_by_year(table: pd.DataFrame):
     )
 
     print("\n--- Cohort comparison: probability of refiling within 1 year ---")
+    results = {}
     for cohort_label, group in table.groupby("cohort", observed=True):
         kmf = KaplanMeierFitter()
         kmf.fit(durations=group["duration_years"], event_observed=group["event_observed"])
         refile_1y = 1 - kmf.survival_function_at_times(1).iloc[0]
         print(f"{cohort_label}: n={len(group):>6}  P(refile within 1yr) = {refile_1y:.3f}")
+        results[str(cohort_label)] = refile_1y
+
+    return results
 
 
 if __name__ == "__main__":  # pragma: no cover
