@@ -7,6 +7,7 @@ import pandas as pd
 from lifelines import KaplanMeierFitter
 
 from biastk.survival_analysis import build_duration_table
+from biastk.survival_analysis import fit_cox_year_trend
 
 
 def make_synthetic_panel(n, hazard_fn, as_of_years=6.0, seed=42):
@@ -81,3 +82,31 @@ def test_kaplan_meier_beats_naive_on_real_code_path_with_cohort_drift():
     km_error = abs(km - true_rate)
 
     assert km_error < naive_error
+
+def test_cox_model_detects_declining_hazard_trend():
+    """Later cohorts should show a lower hazard (HR < 1) for first_filing_year,
+    with a small p-value, on a panel constructed so later-year companies are
+    less likely to refile early."""
+    rng = np.random.default_rng(7)
+    n = 4000
+    rows = []
+    for i in range(n):
+        year = rng.integers(2015, 2024)
+        p_refile = max(0.05, 0.30 - 0.02 * (year - 2015))
+        first = pd.Timestamp(year=int(year), month=int(rng.integers(1, 13)), day=1)
+        rows.append({"CIK": f"C{i}", "FILING_DATE": first})
+        if rng.random() < p_refile:
+            gap_days = int(rng.integers(30, 700))
+            rows.append({"CIK": f"C{i}", "FILING_DATE": first + pd.Timedelta(days=gap_days)})
+
+    panel = pd.DataFrame(rows)
+    as_of = pd.Timestamp("2024-06-01")
+    table = build_duration_table(panel, as_of)
+    table = table[table["duration_years"] > 0]
+
+    cph = fit_cox_year_trend(table)
+    hazard_ratio = cph.hazard_ratios_["first_filing_year"]
+    p_value = cph.summary.loc["first_filing_year", "p"]
+
+    assert hazard_ratio < 1
+    assert p_value < 0.05

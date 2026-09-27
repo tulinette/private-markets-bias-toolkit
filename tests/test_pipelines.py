@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 import biastk.naive as naive
 import biastk.survival_analysis as survival_analysis
+from biastk.survival_analysis import run_cox_year_trend_model
 import biastk.load_panel as load_panel
 from tests.test_load_panel import make_fake_quarter
 
@@ -68,3 +69,9 @@ def test_load_all_quarters_concatenates_multiple_quarters(tmp_path, monkeypatch)
     result = load_panel.load_all_quarters()
     assert len(result) == 2
     assert set(result["CIK"]) == {"C001", "C002"}
+
+def test_run_cox_year_trend_model_executes_end_to_end(monkeypatch):
+    panel = build_rich_synthetic_panel()
+    monkeypatch.setattr("biastk.survival_analysis.load_all_quarters", lambda: panel)
+    cph = run_cox_year_trend_model()
+    assert "first_filing_year" in cph.hazard_ratios_

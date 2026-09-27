@@ -8,7 +8,7 @@ yet, but that's different from assuming they failed or excluding them.
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from lifelines import KaplanMeierFitter
+from lifelines import KaplanMeierFitter, CoxPHFitter
 
 try:
     from .load_panel import load_all_quarters
@@ -45,6 +45,34 @@ def build_duration_table(panel: pd.DataFrame, as_of: pd.Timestamp) -> pd.DataFra
     table["event_observed"] = event_observed.astype(int)
 
     return table
+
+def fit_cox_year_trend(table: pd.DataFrame) -> CoxPHFitter:
+    """Fits a Cox proportional-hazards model with first-filing year as a
+    continuous covariate, to test statistically whether the cohort decline
+    seen in compare_cohorts_by_year is a real trend or could be noise."""
+    data = table.copy()
+    data["first_filing_year"] = data["first_filing"].dt.year
+
+    cph = CoxPHFitter()
+    cph.fit(
+        data[["duration_years", "event_observed", "first_filing_year"]],
+        duration_col="duration_years",
+        event_col="event_observed",
+    )
+    return cph
+
+
+def run_cox_year_trend_model():
+    panel = load_all_quarters()
+    panel = panel[panel["is_operating_company"]]
+    as_of = panel["FILING_DATE"].max()
+
+    table = build_duration_table(panel, as_of)
+    table = table[table["duration_years"] > 0]
+
+    cph = fit_cox_year_trend(table)
+    cph.print_summary()
+    return cph
 
 
 def run_survival_analysis():
@@ -103,3 +131,4 @@ def compare_cohorts_by_year(table: pd.DataFrame):
 if __name__ == "__main__":  # pragma: no cover
     kmf, table = run_survival_analysis()
     compare_cohorts_by_year(table)
+    run_cox_year_trend_model()

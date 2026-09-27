@@ -1,7 +1,7 @@
 # private-markets-bias-toolkit
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-10%20passing-brightgreen)
+[![Tests](https://github.com/tulinette/private-markets-bias-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/tulinette/private-markets-bias-toolkit/actions/workflows/tests.yml)
 ![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
