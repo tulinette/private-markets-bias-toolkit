@@ -50,7 +50,7 @@ def fetch_form_d_range(start_year: int, start_quarter: int, end_year: int, end_q
 
 
 if __name__ == "__main__":
-    paths = fetch_form_d_range(2019, 1, 2020, 4)
+    paths = fetch_form_d_range(2015, 1, 2023, 4)
     print(f"Downloaded {len(paths)} quarters:")
     for p in paths:
         print(" -", p)
