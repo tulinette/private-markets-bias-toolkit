@@ -8,10 +8,10 @@ RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 
 
 def load_quarter(quarter_dir: Path) -> pd.DataFrame:
-    """Load and join FORMDSUBMISSION.tsv + ISSUERS.tsv for one quarter.
-    Returns one row per (issuer, filing) with CIK, ENTITYNAME, FILING_DATE.
+    """Load and join FORMDSUBMISSION.tsv + ISSUERS.tsv + OFFERING.tsv for
+    one quarter. Returns one row per (issuer, filing) with CIK, ENTITYNAME,
+    FILING_DATE, and fund/operating-company classification fields.
     """
-    # each quarter's zip extracts into a nested folder like '2019Q1_d'
     inner = next(quarter_dir.glob("*_d"))
 
     submissions = pd.read_csv(
@@ -24,13 +24,27 @@ def load_quarter(quarter_dir: Path) -> pd.DataFrame:
         usecols=["ACCESSIONNUMBER", "CIK", "ENTITYNAME", "IS_PRIMARYISSUER_FLAG"],
         dtype=str,
     )
+    offering = pd.read_csv(
+        inner / "OFFERING.tsv", sep="\t",
+        usecols=["ACCESSIONNUMBER", "INDUSTRYGROUPTYPE", "ISPOOLEDINVESTMENTFUNDTYPE"],
+        dtype=str,
+    )
 
-    # keep only the primary issuer per filing (a filing can list co-issuers)
     issuers = issuers[issuers["IS_PRIMARYISSUER_FLAG"] == "YES"]
+
     merged = issuers.merge(submissions, on="ACCESSIONNUMBER", how="inner")
+    merged = merged.merge(offering, on="ACCESSIONNUMBER", how="left")
     merged["FILING_DATE"] = pd.to_datetime(merged["FILING_DATE"], format="mixed")
-    merged["quarter"] = quarter_dir.name  # e.g. '2019q1'
-    return merged[["CIK", "ENTITYNAME", "FILING_DATE", "quarter"]]
+
+    merged["quarter"] = quarter_dir.name
+
+    is_fund = (
+        (merged["INDUSTRYGROUPTYPE"] == "Pooled Investment Fund")
+        | (merged["ISPOOLEDINVESTMENTFUNDTYPE"] == "true")
+    )
+    merged["is_operating_company"] = ~is_fund
+
+    return merged[["CIK", "ENTITYNAME", "FILING_DATE", "quarter", "is_operating_company"]]
 
 
 def load_all_quarters() -> pd.DataFrame:
