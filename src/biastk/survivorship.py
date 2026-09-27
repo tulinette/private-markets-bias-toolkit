@@ -31,7 +31,7 @@ def build_survival_labels(panel: pd.DataFrame, as_of: pd.Timestamp) -> pd.DataFr
     return companies
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     from load_panel import load_all_quarters
 
     panel = load_all_quarters()

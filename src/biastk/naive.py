@@ -81,5 +81,5 @@ def run_naive_model():
     return model, data
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     run_naive_model()

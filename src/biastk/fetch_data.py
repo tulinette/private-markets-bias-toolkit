@@ -49,7 +49,7 @@ def fetch_form_d_range(start_year: int, start_quarter: int, end_year: int, end_q
     return downloaded
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     paths = fetch_form_d_range(2015, 1, 2023, 4)
     print(f"Downloaded {len(paths)} quarters:")
     for p in paths:

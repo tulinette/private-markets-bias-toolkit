@@ -55,7 +55,7 @@ def load_all_quarters() -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     panel = load_all_quarters()
     print(f"\nTotal filings loaded: {len(panel)}")
     print(f"Unique companies (CIK): {panel['CIK'].nunique()}")

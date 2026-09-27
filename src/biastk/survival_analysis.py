@@ -96,6 +96,6 @@ def compare_cohorts_by_year(table: pd.DataFrame):
         print(f"{cohort_label}: n={len(group):>6}  P(refile within 1yr) = {refile_1y:.3f}")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     kmf, table = run_survival_analysis()
     compare_cohorts_by_year(table)
