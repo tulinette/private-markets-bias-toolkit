@@ -3,7 +3,7 @@ name = "biastk"
 version = "0.1.0"
 description = "Survivorship- and lookahead-bias correction toolkit for private-markets scoring models"
 requires-python = ">=3.10"
-dependencies = ["pandas", "numpy", "scikit-learn", "lifelines"]
+dependencies = ["pandas", "numpy", "scikit-learn", "lifelines", "requests"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov"]
