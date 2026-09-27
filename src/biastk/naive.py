@@ -14,10 +14,12 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from load_panel import load_all_quarters
-from survivorship import build_survival_labels, SURVIVAL_YEARS
+try:
+    from .load_panel import load_all_quarters
+    from .survivorship import build_survival_labels, SURVIVAL_YEARS
+except ImportError:
+    from load_panel import load_all_quarters
+    from survivorship import build_survival_labels, SURVIVAL_YEARS
 
 
 def build_first_filing_features(panel: pd.DataFrame) -> pd.DataFrame:

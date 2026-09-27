@@ -10,9 +10,10 @@ import numpy as np
 from pathlib import Path
 from lifelines import KaplanMeierFitter
 
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from load_panel import load_all_quarters
+try:
+    from .load_panel import load_all_quarters
+except ImportError:
+    from load_panel import load_all_quarters
 
 
 def build_duration_table(panel: pd.DataFrame, as_of: pd.Timestamp) -> pd.DataFrame:
