@@ -8,10 +8,6 @@ RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 
 
 def load_quarter(quarter_dir: Path) -> pd.DataFrame:
-    """Load and join FORMDSUBMISSION.tsv + ISSUERS.tsv + OFFERING.tsv for
-    one quarter. Returns one row per (issuer, filing) with CIK, ENTITYNAME,
-    FILING_DATE, and fund/operating-company classification fields.
-    """
     inner = next(quarter_dir.glob("*_d"))
 
     submissions = pd.read_csv(
@@ -21,12 +17,14 @@ def load_quarter(quarter_dir: Path) -> pd.DataFrame:
     )
     issuers = pd.read_csv(
         inner / "ISSUERS.tsv", sep="\t",
-        usecols=["ACCESSIONNUMBER", "CIK", "ENTITYNAME", "IS_PRIMARYISSUER_FLAG"],
+        usecols=["ACCESSIONNUMBER", "CIK", "ENTITYNAME", "IS_PRIMARYISSUER_FLAG",
+                  "STATEORCOUNTRY", "ENTITYTYPE"],
         dtype=str,
     )
     offering = pd.read_csv(
         inner / "OFFERING.tsv", sep="\t",
-        usecols=["ACCESSIONNUMBER", "INDUSTRYGROUPTYPE", "ISPOOLEDINVESTMENTFUNDTYPE"],
+        usecols=["ACCESSIONNUMBER", "INDUSTRYGROUPTYPE", "ISPOOLEDINVESTMENTFUNDTYPE",
+                  "TOTALOFFERINGAMOUNT"],
         dtype=str,
     )
 
@@ -35,7 +33,6 @@ def load_quarter(quarter_dir: Path) -> pd.DataFrame:
     merged = issuers.merge(submissions, on="ACCESSIONNUMBER", how="inner")
     merged = merged.merge(offering, on="ACCESSIONNUMBER", how="left")
     merged["FILING_DATE"] = pd.to_datetime(merged["FILING_DATE"], format="mixed")
-
     merged["quarter"] = quarter_dir.name
 
     is_fund = (
@@ -44,7 +41,9 @@ def load_quarter(quarter_dir: Path) -> pd.DataFrame:
     )
     merged["is_operating_company"] = ~is_fund
 
-    return merged[["CIK", "ENTITYNAME", "FILING_DATE", "quarter", "is_operating_company"]]
+    cols = ["CIK", "ENTITYNAME", "FILING_DATE", "quarter", "is_operating_company",
+            "STATEORCOUNTRY", "ENTITYTYPE", "INDUSTRYGROUPTYPE", "TOTALOFFERINGAMOUNT"]
+    return merged[cols]
 
 
 def load_all_quarters() -> pd.DataFrame:
